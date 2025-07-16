@@ -30,17 +30,32 @@ function validatePhoneNumber(phoneNumber) {
 function getLocation(phoneNumber) {
     const countryCode = phoneNumber.match(/^\+\d+/)[0];
     const numberPart = phoneNumber.replace(countryCode, '');
-    const locationIndex = parseInt(numberPart.slice(0, 1)) % locations.length;
+    const locationIndex = parseInt(numberPart.slice(0, 2)) % locations.length;
     return locations[locationIndex];
 }
 function getCarrier(phoneNumber) {
     const countryCode = phoneNumber.match(/^\+\d+/)[0];
     const carrierList = carriers[countryCode] || ['Unknown'];
-    return carrierList[parseInt(phoneNumber.replace(countryCode, '').slice(0, 1)) % carrierList.length];
+    return carrierList[parseInt(phoneNumber.replace(countryCode, '').slice(0, 2)) % carrierList.length];
 }
 function getAccuracy(phoneNumber) {
     const numberPart = phoneNumber.replace(/^\+\d+/, '');
-    return (parseInt(numberPart.slice(0, 2)) % 7 + 1).toFixed(1);
+    return (parseInt(numberPart.slice(0, 3)) % 5 + 1).toFixed(1);
+}
+function getNetworkType() {
+    return ['4G', '5G', '3G'][Math.floor(Math.random() * 3)];
+}
+function getSignalStrength() {
+    return Math.floor(Math.random() * 100);
+}
+function getDeviceType() {
+    return ['Smartphone', 'Tablet', 'Feature Phone'][Math.floor(Math.random() * 3)];
+}
+function getIPAddress() {
+    return `192.168.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}`;
+}
+function getTimeZone() {
+    return ['UTC-5', 'UTC+1', 'UTC+9'][Math.floor(Math.random() * 3)];
 }
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
@@ -56,6 +71,11 @@ app.post('/api/locate', (req, res) => {
     const location = getLocation(phoneNumber);
     const carrier = getCarrier(phoneNumber);
     const accuracy = getAccuracy(phoneNumber);
-    res.json({ ...location, carrier, accuracy });
+    const networkType = getNetworkType();
+    const signalStrength = getSignalStrength();
+    const deviceType = getDeviceType();
+    const ipAddress = getIPAddress();
+    const timeZone = getTimeZone();
+    res.json({ ...location, carrier, accuracy, networkType, signalStrength, deviceType, ipAddress, timeZone });
 });
 app.listen(port, () => console.log(`Server running on port ${port}`));
